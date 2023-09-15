@@ -2,7 +2,7 @@ import axios from "axios";
 import express from "express"
 import FormData from "form-data"
 import cookieParser from "cookie-parser"
-import puppeteer from "puppeteer";
+import puppeteer, { Page } from "puppeteer";
 
 const app = express();
 app.use(express.json())
@@ -39,32 +39,72 @@ app.get("/silabuss",async (req,res) => {
   const response = await axios.get("https://programs.cu.edu.ge/students/schedule.php",{headers:{
     Accept:"*/*",
     Cookie,
-    "User-Agent": "PostmanRuntime/7.32.3",
   }
   })
   res.send(response.config)
 })
 app.get("/sylabuss",async (req,res) => {
-  const browser = await puppeteer.launch({ headless:true, args: ['--disable-dev-shm-usage'] });
+  const browser = await puppeteer.launch({ headless:false, args: ['--disable-dev-shm-usage'] });
   const page = await browser.newPage();
-  // const cookie=req.cookies.PHPSESSID
-  // await page.setCookie({name:'PHPSESSID',value:cookie,httpOnly:true,secure:true,domain:'programs.cu.edu.ge',path:"/"})
 
-  // await page.goto(`${baseUrl}/loginStud`, { waitUntil: 'domcontentloaded' });
-  // await page.type("#pirn",pirn,{delay:100})
-  // await   page.type("input[name='password']",pirn,{delay:100})
-  // await page.click("button[value='Login']",{delay:100})
-  //
-  // await page.waitForTimeout(100)
+  await signIn(page)
 
   await page.goto(`https://programs.cu.edu.ge/students/schedule.php`, { waitUntil: 'domcontentloaded' });
+
   try{
   const select="body > table > tbody > tr:nth-child(2) > td:nth-child(2) > form > table:nth-child(4) > tbody > tr:nth-child(3) > td > table > tbody"
+
   await page.waitForSelector(select)
   }catch(e){
     console.log("wait for selector failed")
   }
-  const jsonArr=await page.evaluate(() => {
+  const jsonArr=await extractLeqctures(page)
+  res.json(jsonArr)
+  await browser.close();
+});
+
+app.get("/gpa",async (req,res) => {
+  const browser = await puppeteer.launch({ headless:false, args: ['--disable-dev-shm-usage'] });
+  const page = await browser.newPage();
+
+  await signIn(page)
+
+  await page.goto(`https://programs.cu.edu.ge/students/gpa.php`, { waitUntil: 'domcontentloaded' });
+
+  try{
+  const select="body > table > tbody > tr:nth-child(2) > td:nth-child(2) > form > table:nth-child(4) > tbody > tr:nth-child(3) > td > table > tbody"
+
+  await page.waitForSelector(select)
+  }catch(e){
+    console.log("wait for selector failed")
+  }
+  // const jsonArr=await extractLeqctures(page)
+  // res.json(jsonArr)
+  await browser.close();
+});
+
+app.get("/sylabuss",async (req,res) => {
+  const browser = await puppeteer.launch({ headless:false, args: ['--disable-dev-shm-usage'] });
+  const page = await browser.newPage();
+
+  await signIn(page)
+
+  await page.goto(`https://programs.cu.edu.ge/students/schedule.php`, { waitUntil: 'domcontentloaded' });
+
+  try{
+  const select="body > table > tbody > tr:nth-child(2) > td:nth-child(2) > form > table:nth-child(4) > tbody > tr:nth-child(3) > td > table > tbody"
+
+  await page.waitForSelector(select)
+  }catch(e){
+    console.log("wait for selector failed")
+  }
+  const jsonArr=await extractLeqctures(page)
+  res.json(jsonArr)
+  await browser.close();
+});
+
+async function extractLeqctures(page:Page){
+  return await page.evaluate(() => {
     const keys:string[]=[]
     const jsonTb:{[key:string]:string}[]=[]
     const select="body > table > tbody > tr:nth-child(2) > td:nth-child(2) > form > table:nth-child(4) > tbody > tr:nth-child(3) > td > table > tbody"
@@ -86,6 +126,10 @@ app.get("/sylabuss",async (req,res) => {
     }
     return jsonTb
   })
-  res.json(jsonArr)
-  await browser.close();
-});
+}
+async function signIn(page:Page){
+  await page.goto(`${baseUrl}/loginStud`, { waitUntil: 'domcontentloaded' });
+  await page.type("#pirn",pirn,{delay:100})
+  await   page.type("input[name='password']",pirn,{delay:100})
+  await page.click("button[value='Login']",{delay:100})
+}
