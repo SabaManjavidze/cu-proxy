@@ -84,7 +84,7 @@ async function extractGrades(pg: Page) {
     return arr;
   });
 }
-export async function main(req: Express.Request, res: Express.Response) {
+export async function main() {
   const browser = await puppeteer.launch({
     headless: false,
     args: ["--disable-dev-shm-usage", "--start-maximized"],
@@ -130,9 +130,6 @@ export async function main(req: Express.Request, res: Express.Response) {
     );
     await page.waitForTimeout(1000);
     const lastGrade = (await getLastGrade(page)) as Grade;
-    if (!lastGrade?.date) {
-      return res.send(400);
-    }
     const dbGrade = await db.query.grades.findFirst({
       where: eq(schema.grades.id, course),
     });
@@ -158,5 +155,4 @@ export async function main(req: Express.Request, res: Express.Response) {
     await page.waitForTimeout(300);
   }
   await page.close();
-  res.send(200);
 }
