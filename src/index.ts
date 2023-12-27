@@ -118,13 +118,13 @@ export async function main() {
     "body > table > tbody > tr:nth-child(2) > td:nth-child(1) > div > a:nth-child(1)"
   );
 
-  await page.waitForTimeout(700);
+  await page.waitForTimeout(1000);
   // GPA
   await page.click(
     "#myform > table > tbody > tr > td > p:nth-child(4) > a",
     {}
   );
-  await page.waitForTimeout(700);
+  await page.waitForTimeout(1000);
 
   const keys = Object.keys(subjectsMap) as [keyof typeof subjectsMap];
   for (let j = 0; j < keys.length; j++) {
@@ -163,7 +163,7 @@ export async function main() {
       await db.insert(schema.grades).values({ ...lastGrade, id: course });
     }
     await page.goBack();
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(1000);
   }
   await page.close();
 }
