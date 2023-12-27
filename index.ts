@@ -11,7 +11,7 @@ const port = 3000;
 // });
 app.get("/", (req, res) => res.sendStatus(200).json({ message: "hello" }));
 
-schedule("0 6-23/6 * * *", main);
+schedule("0 12-23/6 * * *", main);
 // schedule("*/3 * * * *", main);
 // schedule("* * * * *", () => console.log("hello"));
 app.listen(process.env.PORT || port, () =>

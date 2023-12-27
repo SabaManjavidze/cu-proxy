@@ -86,7 +86,7 @@ async function extractGrades(pg: Page) {
 }
 export async function main() {
   const browser = await puppeteer.launch({
-    headless: true,
+    headless: "new",
     args: [
       "--disable-dev-shm-usage",
       "--start-maximized",
