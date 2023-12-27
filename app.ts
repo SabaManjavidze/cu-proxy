@@ -12,7 +12,7 @@ app.post("/cron", (req, res) => {
 app.get("/", (req, res) => res.send("hello"));
 
 // schedule("0 6-23/6 * * *", main);
-schedule("* * * * *", main);
+schedule("* * * * *", () => console.log("hello"));
 app.listen(process.env.PORT || port, () =>
   console.log(`Listening on port ${port}`)
 );
