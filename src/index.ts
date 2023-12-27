@@ -7,15 +7,7 @@ import postgres from "postgres";
 import { eq } from "drizzle-orm";
 import axios from "axios";
 import { config } from "dotenv";
-import express, { Express } from "express";
 
-// const app = express();
-// app.use(express.json());
-// app.use(cookieParser());
-
-// app.listen(3000, () => {
-//   console.log("Server is running on port 3000");
-// });
 config();
 const pirn = "01005034686";
 const baseUrl = "https://programs.cu.edu.ge/cu";
