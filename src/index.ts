@@ -7,6 +7,7 @@ import postgres from "postgres";
 import { eq } from "drizzle-orm";
 import axios from "axios";
 import { config } from "dotenv";
+import type Express from "express";
 
 config();
 const pirn = "01005034686";
@@ -83,7 +84,7 @@ async function extractGrades(pg: Page) {
     return arr;
   });
 }
-async function main() {
+export async function main(req: Express.Request, res: Express.Response) {
   const browser = await puppeteer.launch({
     headless: false,
     args: ["--disable-dev-shm-usage", "--start-maximized"],
@@ -129,6 +130,9 @@ async function main() {
     );
     await page.waitForTimeout(1000);
     const lastGrade = (await getLastGrade(page)) as Grade;
+    if (!lastGrade?.date) {
+      return res.send(400);
+    }
     const dbGrade = await db.query.grades.findFirst({
       where: eq(schema.grades.id, course),
     });
@@ -153,5 +157,6 @@ async function main() {
     await page.goBack();
     await page.waitForTimeout(300);
   }
+  await page.close();
+  res.send(200);
 }
-main();
