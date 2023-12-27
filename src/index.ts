@@ -1,135 +1,165 @@
+import puppeteer from "puppeteer";
+import type { Page } from "puppeteer";
+import * as schema from "./db/schema";
+import { drizzle } from "drizzle-orm/postgres-js";
+import { CONNECTION_STRING } from "./constants";
+import postgres from "postgres";
+import { eq } from "drizzle-orm";
 import axios from "axios";
-import express from "express"
-import FormData from "form-data"
-import cookieParser from "cookie-parser"
-import puppeteer, { Page } from "puppeteer";
+import { config } from "dotenv";
+import express, { Express } from "express";
 
-const app = express();
-app.use(express.json())
-app.use(cookieParser())
+// const app = express();
+// app.use(express.json());
+// app.use(cookieParser());
 
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
-});
+// app.listen(3000, () => {
+//   console.log("Server is running on port 3000");
+// });
+config();
+const pirn = "01005034686";
+const baseUrl = "https://programs.cu.edu.ge/cu";
 
-    const pirn="01005034686"
-    const baseUrl="https://programs.cu.edu.ge/cu"
-
-app.get("/login",async (req,res) => {
-  const browser = await puppeteer.launch({ headless:true, args: ['--disable-dev-shm-usage'] });
-  const page = await browser.newPage();
-  await page.goto(`${baseUrl}/loginStud`, { waitUntil: 'domcontentloaded' });
-  await page.type("#pirn",pirn,{delay:100})
-  await page.type("input[name='password']",pirn,{delay:100})
-  await page.click("button[value='Login']",{delay:100})
-  const cookies=await page.cookies()
-  const {name,value}=cookies[0]
-  await page.setCookie({name,value,secure:true,path:"/",expires:10 * 365 * 24 * 60 * 60})
-  const ckies=await page.cookies()
-  console.log({ckies})
-  res.cookie(name,value)
-  res.sendStatus(200)
-  await browser.close();
-  // res.send({data:loginStud.data,headers:loginStud.headers,imIn:JSON.stringify(loginStud.data).search("MY CU App")==-1})
-});
-
-
-app.get("/silabuss",async (req,res) => {
-  const Cookie=`PHPSESSID=${req.cookies.PHPSESSID};httpOnly;secure;path='/'`
-  const response = await axios.get("https://programs.cu.edu.ge/students/schedule.php",{headers:{
-    Accept:"*/*",
-    Cookie,
-  }
-  })
-  res.send(response.config)
-})
-app.get("/sylabuss",async (req,res) => {
-  const browser = await puppeteer.launch({ headless:false, args: ['--disable-dev-shm-usage'] });
-  const page = await browser.newPage();
-
-  await signIn(page)
-
-  await page.goto(`https://programs.cu.edu.ge/students/schedule.php`, { waitUntil: 'domcontentloaded' });
-
-  try{
-  const select="body > table > tbody > tr:nth-child(2) > td:nth-child(2) > form > table:nth-child(4) > tbody > tr:nth-child(3) > td > table > tbody"
-
-  await page.waitForSelector(select)
-  }catch(e){
-    console.log("wait for selector failed")
-  }
-  const jsonArr=await extractLeqctures(page)
-  res.json(jsonArr)
-  await browser.close();
-});
-
-app.get("/gpa",async (req,res) => {
-  const browser = await puppeteer.launch({ headless:false, args: ['--disable-dev-shm-usage'] });
-  const page = await browser.newPage();
-
-  await signIn(page)
-
-  await page.goto(`https://programs.cu.edu.ge/students/gpa.php`, { waitUntil: 'domcontentloaded' });
-
-  try{
-  const select="body > table > tbody > tr:nth-child(2) > td:nth-child(2) > form > table:nth-child(4) > tbody > tr:nth-child(3) > td > table > tbody"
-
-  await page.waitForSelector(select)
-  }catch(e){
-    console.log("wait for selector failed")
-  }
-  // const jsonArr=await extractLeqctures(page)
-  // res.json(jsonArr)
-  await browser.close();
-});
-
-app.get("/sylabuss",async (req,res) => {
-  const browser = await puppeteer.launch({ headless:false, args: ['--disable-dev-shm-usage'] });
-  const page = await browser.newPage();
-
-  await signIn(page)
-
-  await page.goto(`https://programs.cu.edu.ge/students/schedule.php`, { waitUntil: 'domcontentloaded' });
-
-  try{
-  const select="body > table > tbody > tr:nth-child(2) > td:nth-child(2) > form > table:nth-child(4) > tbody > tr:nth-child(3) > td > table > tbody"
-
-  await page.waitForSelector(select)
-  }catch(e){
-    console.log("wait for selector failed")
-  }
-  const jsonArr=await extractLeqctures(page)
-  res.json(jsonArr)
-  await browser.close();
-});
-
-async function extractLeqctures(page:Page){
-  return await page.evaluate(() => {
-    const keys:string[]=[]
-    const jsonTb:{[key:string]:string}[]=[]
-    const select="body > table > tbody > tr:nth-child(2) > td:nth-child(2) > form > table:nth-child(4) > tbody > tr:nth-child(3) > td > table > tbody"
-    const table=document.querySelector(select)
-    if(!table)return
-    const arr =table.children
-    for(let idx=0;idx<arr.length;idx++){
-      const tableRow=arr[idx].children
-      let obj:{[key:string]:string}={}
-      for(let tdIdx=0;tdIdx<tableRow.length;tdIdx++){
-        const td=tableRow[tdIdx]
-        if(idx==0){
-          keys.push(td.innerHTML)
-        }else{
-          obj[keys[tdIdx]]=td.innerHTML as string
+export const subjectsMap = {
+  "DM 1140": 0,
+  "PCP 1140": 1,
+  "ICS 1140": 2,
+  "ACWR 0007": 3,
+  "MATH 0003": 4,
+  "OS 1240": 5,
+  "CARC 1240": 6,
+} as const;
+export const client = postgres(CONNECTION_STRING, { max: 1 });
+export const db = drizzle(client, { schema });
+async function signIn(page: Page) {
+  await page.goto(`${baseUrl}/loginStud`, { waitUntil: "domcontentloaded" });
+  await page.type("#pirn", pirn, { delay: 100 });
+  await page.type("input[name='password']", pirn, { delay: 100 });
+  await page.click("button[value='Login']", { delay: 100 });
+}
+type Grade = {
+  grade: string;
+  maxGrade: string;
+  activity: string;
+  date: string;
+};
+const colorMap = {
+  red: "rgb(255, 0, 0)",
+  green: "rgb(189, 255, 206)",
+};
+async function getLastGrade(pg: Page) {
+  return await pg.evaluate(async (colorMap) => {
+    let body = document.querySelector("body > table > tbody");
+    if (!body?.children)
+      return new Error("something went wrong during getting tbody");
+    const keys = ["date", "activity", "maxGrade", "grade"] as const;
+    let grade: Grade = { grade: "0", date: "", activity: "", maxGrade: "0" };
+    const len = body.children.length - 6;
+    for (let i = 2; i < len; i++) {
+      const item = body.children[i];
+      const obj: Grade = { date: "", activity: "", maxGrade: "", grade: "" };
+      for (let j = 0; j < item.children.length; j++) {
+        obj[keys[j]] = item.children[j].innerHTML;
+        if (i < len - 1 && j == item.children.length - 1) {
+          const bg = getComputedStyle(
+            body.children[i + 1].children[j]
+          ).getPropertyValue("background-color");
+          if (bg !== colorMap.red && bg !== colorMap.green) return obj;
         }
       }
-      if(idx!==0)jsonTb.push(obj)
     }
-    return jsonTb
-  })
+    return grade;
+  }, colorMap);
 }
-async function signIn(page:Page){
-  await page.goto(`${baseUrl}/loginStud`, { waitUntil: 'domcontentloaded' });
-  await page.type("#pirn",pirn,{delay:100})
-  await   page.type("input[name='password']",pirn,{delay:100})
-  await page.click("button[value='Login']",{delay:100})
+async function extractGrades(pg: Page) {
+  return await pg.evaluate(async () => {
+    if (typeof document == "undefined") return;
+    let body = document.querySelector("body > table > tbody");
+    if (!body?.children)
+      return new Error("something went wrong during getting tbody");
+    const arr: Grade[] = [];
+    console.log({ body });
+    const keys = ["date", "activity", "maxGrade", "grade"] as const;
+    for (let i = 2; i < body.children.length - 6; i++) {
+      const item = body.children[i];
+      const obj: Grade = { date: "", activity: "", maxGrade: "", grade: "" };
+      for (let j = 0; j < item.children.length; j++) {
+        obj[keys[j]] = item.children[j].innerHTML;
+      }
+      arr.push(obj);
+    }
+    return arr;
+  });
 }
+async function main() {
+  const browser = await puppeteer.launch({
+    headless: false,
+    args: ["--disable-dev-shm-usage", "--start-maximized"],
+    defaultViewport: null,
+  });
+  const page = await browser.newPage();
+  const userAgent =
+    "Mozilla/5.0 (X11; Linux x86_64)" +
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.39 Safari/537.36";
+  await page.setUserAgent(userAgent);
+  console.log("shemevida 1");
+  await signIn(page);
+  console.log("shemevida 2");
+
+  // piradi profili
+  //
+  await page.waitForTimeout(1000);
+  console.log("shemevida 3");
+  await page.click(
+    "body > table > tbody > tr:nth-child(2) > td:nth-child(1) > div > a:nth-child(1)"
+  );
+
+  await page.waitForTimeout(700);
+  // GPA
+  await page.click(
+    "#myform > table > tbody > tr > td > p:nth-child(4) > a",
+    {}
+  );
+  await page.waitForTimeout(700);
+
+  const keys = Object.keys(subjectsMap) as [keyof typeof subjectsMap];
+  for (let j = 0; j < keys.length; j++) {
+    const course = (await page.$eval(
+      `body > table > tbody > tr:nth-child(2) > td:nth-child(2) > table > tbody > tr > td > table > tbody > tr:nth-child(${
+        j + 2
+      }) > td:nth-child(2) > form > input.submit_masala`,
+      (el) => el.value
+    )) as keyof typeof subjectsMap;
+    await page.click(
+      `body > table > tbody > tr:nth-child(2) > td:nth-child(2) > table > tbody > tr > td > table > tbody > tr:nth-child(${
+        j + 2
+      }) > td:nth-child(2) > form > input.submit_masala`
+    );
+    await page.waitForTimeout(1000);
+    const lastGrade = (await getLastGrade(page)) as Grade;
+    const dbGrade = await db.query.grades.findFirst({
+      where: eq(schema.grades.id, course),
+    });
+    console.log({ lastGrade, dbGrade });
+
+    if (
+      lastGrade.date !== dbGrade?.date ||
+      lastGrade.activity !== dbGrade?.activity
+    ) {
+      if (dbGrade) {
+        await axios.post(
+          `https://api.telegram.org/bot${process.env.TELEGRAM_API_TOKEN}/sendMessage`,
+          {
+            chat_id: process.env.TELEGRAM_CHAT_ID,
+            text: `You got <b>${lastGrade.grade}/${lastGrade.maxGrade}</b> doing ${lastGrade.activity} in <b>${course}</b>`,
+            parse_mode: "HTML",
+          }
+        );
+      }
+      await db.insert(schema.grades).values({ ...lastGrade, id: course });
+    }
+    await page.goBack();
+    await page.waitForTimeout(300);
+  }
+}
+main();

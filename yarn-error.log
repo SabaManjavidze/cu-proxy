@@ -1,0 +1,85 @@
+Arguments: 
+  D:\nodejs\node.exe C:\Users\Saba\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js migrate
+
+PATH: 
+  C:\Program Files\WindowsApps\Microsoft.PowerShell_7.4.0.0_x64__8wekyb3d8bbwe;C:\Users\Saba\AppData\Local\nvim-data\mason\bin;C:\Program Files\WindowsApps\Microsoft.PowerShell_7.4.0.0_x64__8wekyb3d8bbwe;C:\Program Files (x86)\VMware\VMware Workstation\bin\;C:\Program Files\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files\Eclipse Adoptium\jdk-17.0.4.8-hotspot\bin;C:\Python310\Scripts\;C:\Python310\;C:\Program Files\Python39\Scripts\;C:\Program Files\Python39\;C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\intel64\compiler;C:\ProgramData\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\dotnet\;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\;C:\Program Files\Azure Data Studio\bin;D:\Git\cmd;C:\Program Files (x86)\Microsoft SQL Server\150\Tools\Binn\;C:\Program Files\Microsoft SQL Server\150\Tools\Binn\;C:\Program Files\Microsoft SQL Server\150\DTS\Binn\;C:\Program Files (x86)\Microsoft SQL Server\150\DTS\Binn\;C:\Program Files\Microsoft SQL Server\130\Tools\Binn\;C:\Program Files\Java\jdk-16.0.1\bin;C:\Program Files\PostgreSQL\14\bin;D:\nodejs\;C:\ProgramData\chocolatey\bin;C:\Program Files\lua;D:\CodeBlocks\MinGW\bin;C:\Users\Saba\scoop\shims;C:\Users\Saba\AppData\Local\Microsoft\WindowsApps;C:\Users\Saba\.dotnet\tools;C:\Program Files\Azure Data Studio\bin;C:\Program Files\Java\jdk-16.0.1\bin;C:\Program Files (x86)\Microsoft VS Code\bin;D:\Microsoft VS Code\bin;D:\VLC;C:\Users\Saba\AppData\Local\Programs\Hyper\resources\bin;D:\heroku\bin;C:\Users\Saba\AppData\Roaming\Python\Python39\Scripts;D:\Vim\vim82;C:\Users\Saba\AppData\Local\Android\Sdk\platform-tools;C:\Users\Saba\AppData\Roaming\npm;C:\Users\Saba\.dotnet\tools;C:\Users\Saba\AppData\Local\Programs\oh-my-posh\bin;C:\Users\Saba\scoop\apps\neovim\current\bin
+
+Yarn version: 
+  1.22.11
+
+Node version: 
+  16.15.0
+
+Platform: 
+  win32 x64
+
+Trace: 
+  SyntaxError: D:\Projects\Javascript\Node\CentralDispatch\package.json: Unexpected string in JSON at position 421
+      at JSON.parse (<anonymous>)
+      at C:\Users\Saba\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:1625:59
+      at Generator.next (<anonymous>)
+      at step (C:\Users\Saba\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:310:30)
+      at C:\Users\Saba\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:321:13
+
+npm manifest: 
+  {
+    "name": "node-express-typescript-starter",
+    "version": "0.1.0",
+    "description": "A starter Node.js API server using Express, with Docker, Jest, and ESLint. All in Typescript",
+    "main": "dist/index.js",
+    "scripts": {
+      "start": "node dist/index.js",
+      "dev": "nodemon - exec 'ts-node' src/index.ts",
+      "build": "npm run lint && tsc",
+      "lint": "eslint \"**/*.ts\"",
+      "test": "npm run build && jest"
+      "migrate": "tsx ./src/db/migrate.ts",
+      "generate": "drizzle-kit generate:pg"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+      "@types/cookie-parser": "^1.4.4",
+      "@types/cors": "^2.8.12",
+      "@types/deep-diff": "^1.0.3",
+      "@types/express": "^4.17.17",
+      "@types/jest": "^27.5.1",
+      "@types/lodash": "^4.14.199",
+      "@types/morgan": "^1.9.3",
+      "@types/node": "^17.0.35",
+      "@types/supertest": "^2.0.12",
+      "@typescript-eslint/eslint-plugin": "^5.26.0",
+      "@typescript-eslint/parser": "^5.26.0",
+      "concurrently": "^7.2.1",
+      "eslint": "^8.16.0",
+      "jest": "^28.1.0",
+      "nodemon": "^2.0.16",
+      "supertest": "^6.2.3",
+      "ts-jest": "^28.0.3",
+      "ts-node": "^10.8.0",
+      "typescript": "^4.6.4"
+    },
+    "dependencies": {
+      "axios": "^1.4.0",
+      "cookie-parser": "^1.4.6",
+      "cors": "^2.8.5",
+      "deep-diff": "^1.0.2",
+      "dotenv": "^16.0.1",
+      "drizzle-orm": "^0.29.0",
+      "express": "^4.18.2",
+      "form-data": "^4.0.0",
+      "helmet": "^5.1.0",
+      "lodash": "^4.17.21",
+      "morgan": "^1.10.0",
+      "postgres": "^3.4.3",
+      "puppeteer": "^21.2.1",
+      "winston": "^3.7.2"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

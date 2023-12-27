@@ -1,0 +1,1 @@
+ALTER TABLE "grades" ADD COLUMN "date" varchar;
