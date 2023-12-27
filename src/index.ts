@@ -86,9 +86,20 @@ async function extractGrades(pg: Page) {
 }
 export async function main() {
   const browser = await puppeteer.launch({
-    headless: false,
-    args: ["--disable-dev-shm-usage", "--start-maximized"],
+    headless: true,
+    args: [
+      "--disable-dev-shm-usage",
+      "--start-maximized",
+      "--disable-setuid-sandbox",
+      "--no-sandbox",
+      "--single-process",
+      "--no-zygote",
+    ],
     defaultViewport: null,
+    executablePath:
+      process.env.NODE_ENV == "production"
+        ? process.env.PUPPETEER_EXECUTABLE_PATH
+        : puppeteer.executablePath(),
   });
   const page = await browser.newPage();
   const userAgent =
