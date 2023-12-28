@@ -9,7 +9,7 @@ const port = 3000;
 //   main();
 //   res.send(200);
 // });
-app.get("/", (req, res) => res.sendStatus(200).json({ message: "hello" }));
+app.get("/", (req, res) => res.sendStatus(200));
 
 schedule("0 12-23/3 * * *", main);
 // schedule("*/3 * * * *", main);
