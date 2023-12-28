@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "ts-node ./index.ts",
-    "dev": "nodemon - exec 'ts-node' src/index.ts",
+    "dev": "nodemon ./index.ts",
     "build": "tsc",
     "lint": "eslint \"**/*.ts\"",
     "test": "npm run build && jest",

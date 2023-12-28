@@ -159,8 +159,13 @@ export async function main() {
             parse_mode: "HTML",
           }
         );
+        await db
+          .update(schema.grades)
+          .set({ ...lastGrade })
+          .where(eq(schema.grades.id, course));
+      } else {
+        await db.insert(schema.grades).values({ ...lastGrade, id: course });
       }
-      await db.insert(schema.grades).values({ ...lastGrade, id: course });
     }
     await page.goBack();
     await page.waitForTimeout(1000);
