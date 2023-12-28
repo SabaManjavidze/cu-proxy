@@ -26,6 +26,7 @@ export const client = postgres(CONNECTION_STRING, { max: 1 });
 export const db = drizzle(client, { schema });
 async function signIn(page: Page) {
   await page.goto(`${baseUrl}/loginStud`, { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(700);
   await page.type("#pirn", pirn, { delay: 100 });
   await page.type("input[name='password']", pirn, { delay: 100 });
   await page.click("button[value='Login']", { delay: 100 });
