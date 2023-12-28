@@ -5,9 +5,9 @@ import { schedule } from "node-cron";
 const app = express();
 const port = 3000;
 
-app.post("/cron", (req, res) => {
-  main();
-  res.send(200);
+app.post("/cron", async (req, res) => {
+  await main();
+  res.sendStatus(200);
 });
 app.get("/", (req, res) => res.sendStatus(200));
 
