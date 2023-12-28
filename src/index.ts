@@ -11,8 +11,28 @@ import type Express from "express";
 
 config();
 const pirn = "01005034686";
-const baseUrl = "https://programs.cu.edu.ge/cu";
 
+async function extractGrades(pg: Page) {
+  return await pg.evaluate(async () => {
+    if (typeof document == "undefined") return;
+    let body = document.querySelector("body > table > tbody");
+    if (!body?.children)
+      return new Error("something went wrong during getting tbody");
+    const arr: Grade[] = [];
+    console.log({ body });
+    const keys = ["date", "activity", "maxGrade", "grade"] as const;
+    for (let i = 2; i < body.children.length - 6; i++) {
+      const item = body.children[i];
+      const obj: Grade = { date: "", activity: "", maxGrade: "", grade: "" };
+      for (let j = 0; j < item.children.length; j++) {
+        obj[keys[j]] = item.children[j].innerHTML;
+      }
+      arr.push(obj);
+    }
+    return arr;
+  });
+}
+const baseUrl = "https://programs.cu.edu.ge/cu";
 export const subjectsMap = {
   "DM 1140": 0,
   "PCP 1140": 1,
@@ -26,10 +46,10 @@ export const client = postgres(CONNECTION_STRING, { max: 1 });
 export const db = drizzle(client, { schema });
 async function signIn(page: Page) {
   await page.goto(`${baseUrl}/loginStud`, { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(700);
   await page.type("#pirn", pirn, { delay: 100 });
   await page.type("input[name='password']", pirn, { delay: 100 });
   await page.click("button[value='Login']", { delay: 100 });
+  await page.waitForNavigation();
 }
 type Grade = {
   grade: string;
@@ -65,26 +85,6 @@ async function getLastGrade(pg: Page) {
     return grade;
   }, colorMap);
 }
-async function extractGrades(pg: Page) {
-  return await pg.evaluate(async () => {
-    if (typeof document == "undefined") return;
-    let body = document.querySelector("body > table > tbody");
-    if (!body?.children)
-      return new Error("something went wrong during getting tbody");
-    const arr: Grade[] = [];
-    console.log({ body });
-    const keys = ["date", "activity", "maxGrade", "grade"] as const;
-    for (let i = 2; i < body.children.length - 6; i++) {
-      const item = body.children[i];
-      const obj: Grade = { date: "", activity: "", maxGrade: "", grade: "" };
-      for (let j = 0; j < item.children.length; j++) {
-        obj[keys[j]] = item.children[j].innerHTML;
-      }
-      arr.push(obj);
-    }
-    return arr;
-  });
-}
 export async function main() {
   const browser = await puppeteer.launch({
     headless: "new",
@@ -103,29 +103,29 @@ export async function main() {
         : puppeteer.executablePath(),
   });
   const page = await browser.newPage();
-  const userAgent =
-    "Mozilla/5.0 (X11; Linux x86_64)" +
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.39 Safari/537.36";
-  await page.setUserAgent(userAgent);
+  // const userAgent =
+  //   "Mozilla/5.0 (X11; Linux x86_64)" +
+  //   "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.39 Safari/537.36";
+  // await page.setUserAgent(userAgent);
   console.log("shemevida 1");
+  await page.waitForTimeout(1000);
   await signIn(page);
   console.log("shemevida 2");
 
   // piradi profili
   //
-  await page.waitForTimeout(1000);
   console.log("shemevida 3");
   await page.click(
     "body > table > tbody > tr:nth-child(2) > td:nth-child(1) > div > a:nth-child(1)"
   );
+  await page.waitForNavigation();
 
-  await page.waitForTimeout(1000);
   // GPA
   await page.click(
     "#myform > table > tbody > tr > td > p:nth-child(4) > a",
     {}
   );
-  await page.waitForTimeout(1000);
+  await page.waitForNavigation();
 
   const keys = Object.keys(subjectsMap) as [keyof typeof subjectsMap];
   for (let j = 0; j < keys.length; j++) {
@@ -140,7 +140,7 @@ export async function main() {
         j + 2
       }) > td:nth-child(2) > form > input.submit_masala`
     );
-    await page.waitForTimeout(1000);
+    await page.waitForNavigation();
     const lastGrade = (await getLastGrade(page)) as Grade;
     const dbGrade = await db.query.grades.findFirst({
       where: eq(schema.grades.id, course),
