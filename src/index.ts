@@ -113,7 +113,7 @@ export async function main() {
   // piradi profili
   //
   console.log("shemevida 3");
-  await page.waitForSelector(
+  const sel = await page.waitForSelector(
     "body > table > tbody > tr:nth-child(2) > td:nth-child(1) > div > a:nth-child(1)"
   );
   await page.click(
@@ -134,11 +134,13 @@ export async function main() {
       }) > td:nth-child(2) > form > input.submit_masala`,
       (el) => el.value
     )) as keyof typeof subjectsMap;
+    console.log("shemevida 5");
     await page.click(
       `body > table > tbody > tr:nth-child(2) > td:nth-child(2) > table > tbody > tr > td > table > tbody > tr:nth-child(${
         j + 2
       }) > td:nth-child(2) > form > input.submit_masala`
     );
+    console.log("shemevida 6");
     await page.waitForTimeout(500);
     const lastGrade = (await getLastGrade(page)) as Grade;
     const dbGrade = await db.query.grades.findFirst({
