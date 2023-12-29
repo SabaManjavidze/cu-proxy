@@ -49,7 +49,6 @@ async function signIn(page: Page) {
   await page.type("#pirn", pirn, { delay: 100 });
   await page.type("input[name='password']", pirn, { delay: 100 });
   await page.click("button[value='Login']", { delay: 100 });
-  await page.waitForNavigation();
 }
 type Grade = {
   grade: string;
@@ -87,7 +86,7 @@ async function getLastGrade(pg: Page) {
 }
 export async function main() {
   const browser = await puppeteer.launch({
-    headless: "new",
+    headless: true,
     args: [
       "--disable-dev-shm-usage",
       "--start-maximized",
@@ -107,27 +106,27 @@ export async function main() {
   //   "Mozilla/5.0 (X11; Linux x86_64)" +
   //   "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.39 Safari/537.36";
   // await page.setUserAgent(userAgent);
-  console.log("shemevida 1");
-  await page.waitForTimeout(1000);
+  console.log("shemovida 1");
   await signIn(page);
   console.log("shemevida 2");
 
   // piradi profili
   //
   console.log("shemevida 3");
+  await page.waitForSelector(
+    "body > table > tbody > tr:nth-child(2) > td:nth-child(1) > div > a:nth-child(1)"
+  );
   await page.click(
     "body > table > tbody > tr:nth-child(2) > td:nth-child(1) > div > a:nth-child(1)"
   );
-  await page.waitForNavigation();
+  await page.waitForTimeout(500);
 
   // GPA
-  await page.click(
-    "#myform > table > tbody > tr > td > p:nth-child(4) > a",
-    {}
-  );
-  await page.waitForNavigation();
+  await page.click("#myform > table > tbody > tr > td > p:nth-child(4) > a");
+  await page.waitForTimeout(500);
 
   const keys = Object.keys(subjectsMap) as [keyof typeof subjectsMap];
+  console.log("shemevida 4");
   for (let j = 0; j < keys.length; j++) {
     const course = (await page.$eval(
       `body > table > tbody > tr:nth-child(2) > td:nth-child(2) > table > tbody > tr > td > table > tbody > tr:nth-child(${
@@ -140,7 +139,7 @@ export async function main() {
         j + 2
       }) > td:nth-child(2) > form > input.submit_masala`
     );
-    await page.waitForNavigation();
+    await page.waitForTimeout(500);
     const lastGrade = (await getLastGrade(page)) as Grade;
     const dbGrade = await db.query.grades.findFirst({
       where: eq(schema.grades.id, course),

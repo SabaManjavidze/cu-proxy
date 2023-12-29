@@ -1,5 +1,5 @@
 {
-  "name": "node-express-typescript-starter",
+  "name": "cu-grades",
   "version": "0.1.0",
   "description": "A starter Node.js API server using Express, with Docker, Jest, and ESLint. All in Typescript",
   "main": "dist/index.js",
@@ -10,7 +10,8 @@
     "lint": "eslint \"**/*.ts\"",
     "test": "npm run build && jest",
     "migrate": "npx tsx ./src/db/migrate.ts",
-    "generate": "drizzle-kit generate:pg"
+    "generate": "drizzle-kit generate:pg",
+    "docker": "docker-compose up"
   },
   "keywords": [],
   "author": "",
