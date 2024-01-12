@@ -1,9 +1,9 @@
 services:
   app:
     build: .
-    container_name: centraldispatch
-    command: npm run dev
+    container_name: cu-grades
     ports:
       - 3000:3000
     volumes:
-      - ./:/usr/src/app
+      - .:/usr/src/app
+    command: npm run dev

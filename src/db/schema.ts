@@ -1,5 +1,5 @@
 import { pgTable, varchar } from "drizzle-orm/pg-core";
-import { subjectsMap } from "..";
+import { subjectsMap } from "../mainFunc";
 
 type idType = keyof typeof subjectsMap;
 export const grades = pgTable("grades", {
