@@ -1,9 +1,21 @@
 services:
+  # prod:
+  #   build:
+  #     context: .
+  #     dockerfile: ./Dockerfile.prod
+  #   container_name: cu-grades-prod
+  #   ports:
+  #     - 3000:3000
+  #   volumes:
+  #     - .:/app
+  #     - /app/node_modules
+  #   command: cat package.json && npm run start
   app:
     build: .
     container_name: cu-grades
     ports:
       - 3000:3000
     volumes:
-      - .:/usr/src/app
+      - .:/app
+      - /app/node_modules
     command: npm run dev

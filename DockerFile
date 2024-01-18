@@ -1,4 +1,4 @@
-FROM ghcr.io/puppeteer/puppeteer:21.6.1
+FROM ghcr.io/puppeteer/puppeteer:21.7.0
 
 USER root
 
@@ -13,7 +13,6 @@ WORKDIR /app
 
 RUN npm i -g pnpm
 
-
 COPY package.json pnpm-lock.yaml ./
 
 RUN pnpm i --frozen-lockfile
@@ -21,6 +20,3 @@ RUN pnpm i --frozen-lockfile
 COPY . .
 
 CMD [ "pnpm", "start" ]
-
-
-

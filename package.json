@@ -1,10 +1,10 @@
 {
   "name": "cu-grades",
   "version": "0.1.0",
-  "description": "A starter Node.js API server using Express, with Docker, Jest, and ESLint. All in Typescript",
+  "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "start": "node ./dist/index.js",
+    "start": "ts-node-dev src/index.ts",
     "dev": "nodemon --exec node -r @swc-node/register --watch . --legacy-watch src/index.ts",
     "dev2": "pnpm build && node --inspect=0.0.0.0 ./dist/index.js",
     "watch": "watchy --no-init-spawn --debounce 1 -w src -- docker compose restart app",

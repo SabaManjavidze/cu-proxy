@@ -9,7 +9,7 @@ app.get("/cron", async (req, res) => {
   res.sendStatus(200);
 });
 app.get("/", (req, res) => {
-  console.log("feliz navidad");
+  console.log("bitch");
   console.log("please");
   res.sendStatus(200);
 });
