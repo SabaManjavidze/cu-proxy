@@ -6,6 +6,7 @@ const port = 3000;
 
 app.get("/cron", async (req, res) => {
   await main();
+  console.log("-----------------------------------------------------\n");
   res.sendStatus(200);
 });
 app.get("/", (req, res) => {

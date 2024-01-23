@@ -62,8 +62,7 @@ const colorMap = {
 async function getLastGrade(pg: Page) {
   return await pg.evaluate(async (colorMap) => {
     let body = document.querySelector("body > table > tbody");
-    if (!body?.children)
-      return new Error("something went wrong during getting tbody");
+    if (!body?.children) return;
     const keys = ["date", "activity", "maxGrade", "grade"] as const;
     let grade: Grade = { grade: "0", date: "", activity: "", maxGrade: "0" };
     const len = body.children.length - 6;
@@ -77,10 +76,15 @@ async function getLastGrade(pg: Page) {
             body.children[i + 1].children[j]
           ).getPropertyValue("background-color");
           if (bg !== colorMap.red && bg !== colorMap.green) return obj;
+        } else if (i == len - 1 && j == item.children.length - 1) {
+          const bg = getComputedStyle(
+            body.children[i].children[j]
+          ).getPropertyValue("background-color");
+          if (bg == colorMap.red || bg == colorMap.green) return obj;
         }
       }
     }
-    return grade;
+    return grade as Grade;
   }, colorMap);
 }
 export async function main() {
@@ -101,10 +105,7 @@ export async function main() {
         : puppeteer.executablePath(),
   });
   const page = await browser.newPage();
-  // const userAgent =
-  //   "Mozilla/5.0 (X11; Linux x86_64)" +
-  //   "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.39 Safari/537.36";
-  // await page.setUserAgent(userAgent);
+
   console.log("shemovida 1");
   await signIn(page);
   console.log("shemevida 2");
@@ -112,7 +113,7 @@ export async function main() {
   // piradi profili
   //
   console.log("shemevida 3");
-  const sel = await page.waitForSelector(
+  await page.waitForSelector(
     "body > table > tbody > tr:nth-child(2) > td:nth-child(1) > div > a:nth-child(1)"
   );
   await page.click(
@@ -139,7 +140,8 @@ export async function main() {
     await page.click(sel);
     console.log("shemevida 6");
     await page.waitForTimeout(500);
-    const lastGrade = (await getLastGrade(page)) as Grade;
+    const lastGrade = await getLastGrade(page);
+    if (!lastGrade) return;
     const dbGrade = await db.query.grades.findFirst({
       where: eq(schema.grades.id, course),
     });
