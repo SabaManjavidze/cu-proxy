@@ -89,7 +89,7 @@ async function getLastGrade(pg: Page) {
 }
 export async function main() {
   const browser = await puppeteer.launch({
-    headless: true,
+    headless: false,
     args: [
       "--disable-dev-shm-usage",
       "--start-maximized",
@@ -125,17 +125,38 @@ export async function main() {
   await page.click("#myform > table > tbody > tr > td > p:nth-child(4) > a");
   await page.waitForTimeout(1000);
 
-  const keys = Object.keys(subjectsMap) as [keyof typeof subjectsMap];
+  // const keys = Object.keys(subjectsMap) as [keyof typeof subjectsMap];
+  const subjectBodySel =
+    "body > table > tbody > tr:nth-child(2) > td:nth-child(2) > table > tbody > tr > td > table > tbody";
+  const subjectLen = await page.$eval(
+    subjectBodySel,
+    (el) => el.children.length - 5
+  );
   console.log("shemovida 4");
-  for (let j = 0; j < keys.length; j++) {
+  for (let j = 0; j < subjectLen; j++) {
     const sel =
       `body > table > tbody > tr:nth-child(2) > td:nth-child(2) > table > tbody > tr > td > table > tbody > tr:nth-child(${
         j + 2
       }) > td:nth-child(2) > form > input.submit_masala` as const;
-    const course = (await page.$eval(
-      sel,
-      (el) => el.value
-    )) as keyof typeof subjectsMap;
+    const gradeSel =
+      `body > table > tbody > tr:nth-child(2) > td:nth-child(2) > table > tbody > tr > td > table > tbody > tr:nth-child(${
+        j + 2
+      }) > td:nth-child(10)` as const;
+
+    const grade = await page.$eval(gradeSel, (el) => el.innerHTML);
+    const course = await page.$eval(sel, (el) => el.value);
+
+    if (grade == "") {
+      await db.insert(schema.grades).values({
+        activity: "",
+        grade: "0",
+        date: "",
+        id: course,
+        maxGrade: "0",
+      });
+      continue;
+    }
+
     console.log("shemevida 5");
     await page.click(sel);
     console.log("shemevida 6");
@@ -172,4 +193,5 @@ export async function main() {
     await page.waitForTimeout(1000);
   }
   await page.close();
+  await browser.close();
 }
