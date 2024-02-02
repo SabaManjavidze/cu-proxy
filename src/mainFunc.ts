@@ -12,39 +12,11 @@ import { sendMessage } from "./telegram/sendMessage";
 config();
 const pirn = "01005034686";
 
-async function extractGrades(pg: Page) {
-  return await pg.evaluate(async () => {
-    if (typeof document == "undefined") return;
-    let body = document.querySelector("body > table > tbody");
-    if (!body?.children)
-      return new Error("something went wrong during getting tbody");
-    const arr: Grade[] = [];
-    console.log({ body });
-    const keys = ["date", "activity", "maxGrade", "grade"] as const;
-    for (let i = 2; i < body.children.length - 6; i++) {
-      const item = body.children[i];
-      const obj: Grade = { date: "", activity: "", maxGrade: "", grade: "" };
-      for (let j = 0; j < item.children.length; j++) {
-        obj[keys[j]] = item.children[j].innerHTML;
-      }
-      arr.push(obj);
-    }
-    return arr;
-  });
-}
 const baseUrl = "https://programs.cu.edu.ge/cu";
-export const subjectsMap = {
-  "DM 1140": 0,
-  "PCP 1140": 1,
-  "ICS 1140": 2,
-  "ACWR 0007": 3,
-  "MATH 0003": 4,
-  "OS 1240": 5,
-  "CARC 1240": 6,
-} as const;
+
 export const client = postgres(CONNECTION_STRING, { max: 1 });
 export const db = drizzle(client, { schema });
-async function signIn(page: Page) {
+export async function signIn(page: Page) {
   await page.goto(`${baseUrl}/loginStud`, { waitUntil: "domcontentloaded" });
   await page.type("#pirn", pirn, { delay: 100 });
   await page.type("input[name='password']", pirn, { delay: 100 });
