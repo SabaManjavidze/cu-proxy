@@ -79,23 +79,24 @@ export async function main() {
   });
   const page = await browser.newPage();
 
-  console.log("shemovida 1");
+  console.log("Opened up a browser instance.");
   await signIn(page);
-  console.log("shemevida 2");
+  console.log("Signed into your CU page.");
 
   // piradi profili
   //
-  console.log("shemevida 3");
   await page.waitForSelector(
     "body > table > tbody > tr:nth-child(2) > td:nth-child(1) > div > a:nth-child(1)"
   );
   await page.click(
     "body > table > tbody > tr:nth-child(2) > td:nth-child(1) > div > a:nth-child(1)"
   );
+  console.log("Went into personal profile page.");
   await page.waitForTimeout(500);
 
   // GPA
   await page.click("#myform > table > tbody > tr > td > p:nth-child(4) > a");
+  console.log("Went into GPA page.");
   await page.waitForTimeout(1000);
 
   // const keys = Object.keys(subjectsMap) as [keyof typeof subjectsMap];
@@ -105,7 +106,6 @@ export async function main() {
     subjectBodySel,
     (el) => el.children.length - 5
   );
-  console.log("shemovida 4");
   for (let j = 0; j < subjectLen; j++) {
     const courseIdSel =
       `body > table > tbody > tr:nth-child(2) > td:nth-child(2) > table > tbody > tr > td > table > tbody > tr:nth-child(${
@@ -129,9 +129,9 @@ export async function main() {
       });
       continue;
     }
-    console.log("shemevida 5");
+    console.log("Checked for newly added subjects");
     await page.click(courseIdSel);
-    console.log("shemevida 6");
+    console.log(`Went into ${course} grades page.`);
     await page.waitForTimeout(500);
     const lastGrade = await getLastGrade(page);
     if (!lastGrade) return;
