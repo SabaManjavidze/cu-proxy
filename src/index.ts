@@ -10,7 +10,7 @@ app.get("/cron", async (req, res) => {
   res.sendStatus(200);
 });
 app.get("/", (req, res) => {
-  res.sendStatus(200);
+  res.send("hello");
 });
 
 app.listen(process.env.PORT || port, () =>

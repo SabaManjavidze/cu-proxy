@@ -90,7 +90,7 @@ async function getLastGrade(pg: Page) {
 }
 export async function main() {
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     args: [
       "--disable-dev-shm-usage",
       "--start-maximized",
