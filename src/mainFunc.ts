@@ -7,6 +7,7 @@ import postgres from "postgres";
 import { eq } from "drizzle-orm";
 import axios from "axios";
 import { config } from "dotenv";
+import { sendMessage } from "./telegram/sendMessage";
 
 config();
 const pirn = "01005034686";
@@ -134,7 +135,7 @@ export async function main() {
   );
   console.log("shemovida 4");
   for (let j = 0; j < subjectLen; j++) {
-    const sel =
+    const courseIdSel =
       `body > table > tbody > tr:nth-child(2) > td:nth-child(2) > table > tbody > tr > td > table > tbody > tr:nth-child(${
         j + 2
       }) > td:nth-child(2) > form > input.submit_masala` as const;
@@ -144,8 +145,8 @@ export async function main() {
       }) > td:nth-child(10)` as const;
 
     const grade = await page.$eval(gradeSel, (el) => el.innerHTML);
-    const course = await page.$eval(sel, (el) => el.value);
-
+    const course = await page.$eval(courseIdSel, (el) => el.value);
+    // if coures is not graded than just add it to the db
     if (grade == "") {
       await db.insert(schema.grades).values({
         activity: "",
@@ -156,9 +157,8 @@ export async function main() {
       });
       continue;
     }
-
     console.log("shemevida 5");
-    await page.click(sel);
+    await page.click(courseIdSel);
     console.log("shemevida 6");
     await page.waitForTimeout(500);
     const lastGrade = await getLastGrade(page);
@@ -172,22 +172,19 @@ export async function main() {
       lastGrade.date !== dbGrade?.date ||
       lastGrade.activity !== dbGrade?.activity
     ) {
-      if (dbGrade) {
-        await axios.post(
-          `https://api.telegram.org/bot${process.env.TELEGRAM_API_TOKEN}/sendMessage`,
-          {
-            chat_id: process.env.TELEGRAM_CHAT_ID,
-            text: `You got <b>${lastGrade.grade}/${lastGrade.maxGrade}</b> doing ${lastGrade.activity} in <b>${course}</b>`,
-            parse_mode: "HTML",
-          }
-        );
-        await db
-          .update(schema.grades)
-          .set({ ...lastGrade })
-          .where(eq(schema.grades.id, course));
-      } else {
-        await db.insert(schema.grades).values({ ...lastGrade, id: course });
-      }
+      // if (dbGrade) {
+      await sendMessage({
+        chat_id: process.env.TELEGRAM_CHAT_ID as string,
+        text: `You got <b>${lastGrade.grade}/${lastGrade.maxGrade}</b> doing ${lastGrade.activity} in <b>${course}</b>`,
+        parse_mode: "HTML",
+      });
+      await db
+        .update(schema.grades)
+        .set({ ...lastGrade })
+        .where(eq(schema.grades.id, course));
+      // } else {
+      //   await db.insert(schema.grades).values({ ...lastGrade, id: course });
+      // }
     }
     await page.goBack();
     await page.waitForTimeout(1000);
