@@ -9,7 +9,12 @@ app.get("/cron", async (req, res) => {
   console.log("-----------------------------------------------------\n");
   res.sendStatus(200);
 });
+app.post("/command", (req, res) => {
+  console.log(req.body);
+  res.send("hello");
+});
 app.get("/", (req, res) => {
+  console.log("test was successful");
   res.send("hello");
 });
 
